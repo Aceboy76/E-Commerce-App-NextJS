@@ -39,10 +39,10 @@ export default function Register() {
 
             const data = await response.json()
 
-            const emails = data.emails.map((key: Email) => key.email);
+            const fetchedEmails = data.emails.map((key: Email) => key.email);
 
             setRoles(data.roles);
-            setEmails(emails);
+            setEmails(fetchedEmails);
 
         }
         fetchData()
