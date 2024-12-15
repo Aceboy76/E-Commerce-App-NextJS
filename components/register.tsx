@@ -1,4 +1,5 @@
 'use client'
+import { checkExistingUser, createUser, getRoles } from "@/app/api/account/register/action"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -12,6 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { PrismaClient } from "@prisma/client"
+import { X } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -22,28 +25,18 @@ interface Role {
     id: string;
     role_name: string;
 }
-interface Email {
-    email: string;
-}
+
 export default function Register() {
 
 
     const [isClient, setIsClient] = useState(false)
     const [roles, setRoles] = useState<Role[]>([])
-    const [emails, setEmails] = useState<string[]>([])
 
 
     useEffect(() => {
         async function fetchData() {
-            const response = await fetch('/api/register')
-
-            const data = await response.json()
-
-            const fetchedEmails = data.emails.map((key: Email) => key.email);
-
-            setRoles(data.roles);
-            setEmails(fetchedEmails);
-
+            const roles = await getRoles()
+            setRoles(roles);
         }
         fetchData()
         setIsClient(true)
@@ -61,15 +54,8 @@ export default function Register() {
     }).refine((data) => data.password == data.confirmPassword, {
         message: "Password don't match",
         path: ["confirmPassword"]
-    }).refine(async (data) => {
-        if (emails.includes(data.email)) {
-            return false;
-        }
-        return true;
-    }, {
-        message: "Email already exists",
-        path: ["email"]
-    });
+    })
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -85,19 +71,21 @@ export default function Register() {
 
     })
 
+
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-       
 
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(values),
-        })
+        const existingUser = await checkExistingUser(values)
 
-        const result = await response.json()
-        if (response.ok) {
+        if (existingUser) {
+            form.setError("email", {
+                message: "Email already exists",
+            });
+            return;
+        }
+
+        const userCreated = await createUser(values)
+
+        if (userCreated) {
             form.reset()
             alert("User was created successfully")
         }
@@ -112,9 +100,18 @@ export default function Register() {
                     <Card className="w-1/2" >
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
-                                <CardHeader>
-                                    <CardTitle>LOGIN</CardTitle>
-                                    <CardDescription>Enter your credentials</CardDescription>
+                                <CardHeader className="flex flex-row justify-between">
+                                    <div>
+                                        <CardTitle>REGISTER</CardTitle>
+                                        <CardDescription>Create your credentials</CardDescription>
+                                    </div>
+
+                                    <Link href={"/"}>
+                                        <Button type="button" variant={"ghost"}>
+                                            <X />
+                                        </Button>
+                                    </Link>
+
                                 </CardHeader>
                                 <CardContent className="flex flex-row space-x-10">
                                     <div className="w-1/2 space-y-6 ">

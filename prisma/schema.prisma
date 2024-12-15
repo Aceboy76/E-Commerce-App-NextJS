@@ -14,11 +14,20 @@ datasource db {
 }
 
 model Role {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
   role_name String
   User      User[]
 }
 
+model Session {
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
+}
 
 model User {
   id              String    @id @default(cuid())
@@ -33,4 +42,5 @@ model User {
   updatedAt       DateTime  @updatedAt
   createdAt       DateTime  @default(now())
   roleId          String
+  Session         Session[]
 }

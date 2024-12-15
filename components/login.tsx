@@ -1,4 +1,5 @@
 'use client'
+import { loginUser } from "@/app/api/account/login/action"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -11,37 +12,20 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { compare } from "bcrypt-ts"
-import { Eye } from "lucide-react"
+import { Eye, X } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 
-interface User {
-    password: string;
-    email: string;
-}
 
 
 export default function Login() {
 
     const [isClient, setIsClient] = useState(false)
-    const [users, setUsers] = useState<User[]>([])
-
-
 
     useEffect(() => {
-        async function fetchData() {
-            const response = await fetch('/api/login')
-            const data = await response.json()
-
-
-            setUsers(data)
-        }
-
-        fetchData()
         setIsClient(true)
     }, [])
 
@@ -57,7 +41,6 @@ export default function Login() {
 
 
 
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -69,20 +52,11 @@ export default function Login() {
     })
 
 
-
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-        const user = users.find(user => values.email == user.email)
 
-        if (user) {
-            compare(values.password, user.password).then((result) => {
-                if (result) {
-                    alert("user is authenticated")
-                } else[
-                    alert("user is not authenticated")
+        const isUser = await loginUser(values);
 
-                ]
-            });
-        }
+        alert(isUser)
 
     }
 
@@ -94,9 +68,18 @@ export default function Login() {
                     <Card className="w-1/4" >
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
-                                <CardHeader>
-                                    <CardTitle>LOGIN</CardTitle>
-                                    <CardDescription>Enter your credentials</CardDescription>
+                                <CardHeader className="flex flex-row justify-between">
+                                    <div>
+                                        <CardTitle>LOGIN</CardTitle>
+                                        <CardDescription>Enter your credentials</CardDescription>
+                                    </div>
+
+                                    <Link href={"/"}>
+                                        <Button type="button" variant={"ghost"}>
+                                            <X />
+                                        </Button>
+                                    </Link>
+
                                 </CardHeader>
                                 <CardContent className=" space-y-4">
                                     <FormField control={form.control} name="email"
@@ -115,14 +98,17 @@ export default function Login() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Password</FormLabel>
-                                                <div className="flex flex-row">
+                                                <div className="relative">
                                                     <FormControl>
-                                                        <Input placeholder="Password" type="text"
+                                                        <Input placeholder="Password"
+                                                            type="password"
+                                                            className="pr-14"
                                                             {...field} />
                                                     </FormControl>
                                                     <Button
                                                         type="button"
                                                         variant={"ghost"}
+                                                        className="absolute top-1/2 right-2 transform -translate-y-1/2"
                                                     >
                                                         <Eye />
                                                     </Button>
@@ -135,15 +121,17 @@ export default function Login() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Confirm Password</FormLabel>
-                                                <div className="flex flex-row">
+                                                <div className="relative">
                                                     <FormControl>
-                                                        <Input placeholder="Confirm Password" type="password"
+                                                        <Input placeholder="Confirm Password"
+                                                            type="password"
+                                                            className="pr-14"
                                                             {...field} />
-
                                                     </FormControl>
                                                     <Button
                                                         type="button"
                                                         variant={"ghost"}
+                                                        className="absolute top-1/2 right-2 transform -translate-y-1/2"
                                                     >
                                                         <Eye />
                                                     </Button>
