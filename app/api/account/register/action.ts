@@ -1,7 +1,9 @@
 'use server'
 
+import { encrypt } from "@/lib/lib";
 import { PrismaClient } from "@prisma/client"
 import { genSaltSync, hashSync } from "bcrypt-ts";
+import { sendVerificationEmail } from "../../auth/emailVerification";
 
 const prisma = new PrismaClient()
 
@@ -34,6 +36,7 @@ export async function createUser(values: RegisterProps) {
     try {
         const { firstname, middlename, lastname, email, password, role } = values
 
+        console.log(values)
         const salt = genSaltSync(10);
         const hashedPassword = hashSync(password, salt);
 
@@ -49,7 +52,17 @@ export async function createUser(values: RegisterProps) {
             }
         })
 
-        return user
+        const token = await encrypt({ email })
+        try {
+            await sendVerificationEmail({ email, token });
+            console.log('Verification email sent successfully');
+        } catch (emailError) {
+            console.error('Failed to send verification email:', emailError);
+            throw new Error('Failed to send verification email');
+        }
+
+        return token;
+
     } catch (error) {
 
     }

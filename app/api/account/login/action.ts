@@ -15,39 +15,49 @@ interface LoginProps {
 
 export async function loginUser(values: LoginProps) {
 
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                email: values.email,
+            }
+        });
+        console.log("user: " + JSON.stringify(user))
 
-    const user = await prisma.user.findUnique({
-        where: {
-            email: values.email,
+        const hasSession = await getSession();
+        console.log("existingSession: " + hasSession)
+
+        if (hasSession) {
+            return "user is already logged in"
         }
-    });
 
-    const hasSession = await getSession();
+        if (!user) {
+            return "The email or password is incorrect";
+        }
 
-    if (hasSession) {
-        return "user is already logged in" 
+        const result = await compare(values.password, user.password);
+
+        if (result) {
+            const expires = new Date(Date.now() + 100 * 1000);
+
+            const sessionData = {
+                userId: user.id,
+                email: user.email,
+                expires,
+            };
+            console.log('sessionData: ' + JSON.stringify(sessionData));
+
+            const session = await encrypt(sessionData);
+            console.log('session: ' + session)
+
+            const cookie = (await cookies()).set("session", session, { expires, httpOnly: true });
+            console.log('cookie: ' + cookie)
+
+            return "User is logged In";
+        }
+    } catch (error) {
+
     }
 
-    if (!user) {
-        return "The email or password is incorrect";
-    }
-
-    const result = await compare(values.password, user.password);
-
-    if (result) {
-        const expires = new Date(Date.now() + 10 * 1000);
-        
-        const sessionData = {
-            userId: user.id,
-            email: user.email,
-            expires,
-        };
-
-        const session = await encrypt(sessionData);
-
-        (await cookies()).set("session", session, { expires, httpOnly: true });
-        return "User is logged In";
-    }
 
 
 
