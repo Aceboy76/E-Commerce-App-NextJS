@@ -3,7 +3,6 @@
 import verifyEmail from "@/app/api/account/email/action";
 import Loading from "@/components/loading";
 import Message from "@/components/messagePage";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 
