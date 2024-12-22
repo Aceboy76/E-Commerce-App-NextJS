@@ -7,14 +7,6 @@ import { decrypt, encrypt } from '@/lib/lib';
 
 const prisma = new PrismaClient();
 
-interface JWTPayload {
-    firstname: string;
-    middlename: string;
-    lastname: string;
-    email: string;
-    password: string;
-    role: string;
-}
 
 const smtpConfig = {
     host: process.env.EMAIL_HOST,
@@ -36,9 +28,6 @@ const color = {
     buttonBorder: brandColor,
     buttonText: "#fff",
 }
-
-
-
 
 export const sendVerificationEmail = async (email: string, token: string) => {
 
@@ -88,10 +77,10 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 
 };
 
-export default async function verifyEmail(tokenFromUrl: string): Promise<any> {
+export default async function verifyEmail(tokenFromUrl: string) {
 
     try {
-        const decryptedToken = await decrypt<JWTPayload>(tokenFromUrl)
+        const decryptedToken = await decrypt(tokenFromUrl)
 
         const isEmailExist = await prisma.user.findUnique({
             where: {
