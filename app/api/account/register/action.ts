@@ -6,7 +6,6 @@ import { genSaltSync, hashSync } from "bcrypt-ts";
 import { sendVerificationEmail } from "../email/action";
 
 const prisma = new PrismaClient()
-const key = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
 interface RegisterProps {
     email: string;

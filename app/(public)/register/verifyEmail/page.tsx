@@ -2,9 +2,7 @@
 
 import verifyEmail from "@/app/api/account/email/action";
 import Message from "@/components/messagePage";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
