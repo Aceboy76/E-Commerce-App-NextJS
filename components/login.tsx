@@ -54,9 +54,14 @@ export default function Login() {
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
 
-        const isUser = await loginUser(values);
+        try {
+            const isUser = await loginUser(values);
 
-        alert(isUser)
+            alert(isUser)
+        } catch (error) {
+            console.error(error)
+        }
+
 
     }
 
@@ -142,9 +147,11 @@ export default function Login() {
                                         )} />
                                 </CardContent>
                                 <CardFooter className="flex flex-row justify-between">
-                                    <Button variant={"link"} type="button">
-                                        <Link className="text-blue-500" href={"/register"}>Create an account</Link>
-                                    </Button>
+                                    <Link href={"/register"}>
+                                        <Button className="text-blue-700" variant={"link"} type="button">
+                                            Create an account?
+                                        </Button>
+                                    </Link>
                                     <Button type="submit" variant={"default"}>Submit</Button>
                                 </CardFooter>
                             </form>

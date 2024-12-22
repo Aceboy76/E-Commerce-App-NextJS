@@ -30,17 +30,17 @@ model Session {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  firstname       String
-  middlename      String?
-  lastname        String
-  email           String    @unique
-  emailVerified   DateTime?
-  emailVerifToken String?
-  password        String
-  role            Role      @relation(fields: [roleId], references: [id])
-  updatedAt       DateTime  @updatedAt
-  createdAt       DateTime  @default(now())
-  roleId          String
-  Session         Session[]
+  id               String    @id @default(cuid())
+  firstname        String
+  middlename       String?
+  lastname         String
+  email            String    @unique
+  emailVerified    DateTime?
+  emailVerifyToken String?   @db.VarChar(255)
+  password         String
+  role             Role      @relation(fields: [roleId], references: [id])
+  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime  @default(now())
+  roleId           String
+  Session          Session[]
 }

@@ -41,12 +41,15 @@ export default function GuestNavbar() {
                         </div>
 
                         <div className="space-x-4">
-                            <Button>
-                                <Link href={"/login"}>Login</Link>
-                            </Button>
-                            <Button>
-                                <Link href={"/register"}>Register</Link>
-                            </Button>
+
+                            <Link href={"/login"}>
+                                <Button type="button">Login</Button>
+                            </Link>
+
+                            <Link href={"/register"} >
+                                <Button type="button">Register</Button>
+                            </Link>
+
                         </div>
 
 

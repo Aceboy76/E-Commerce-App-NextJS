@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt-ts"; // Import bcrypt for password comparison
 import { cookies } from "next/headers";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient();      
 
 interface LoginProps {
     email: string;
@@ -55,7 +55,7 @@ export async function loginUser(values: LoginProps) {
             return "User is logged In";
         }
     } catch (error) {
-
+        console.error(error);
     }
 
 

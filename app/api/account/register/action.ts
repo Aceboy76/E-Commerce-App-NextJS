@@ -3,9 +3,10 @@
 import { encrypt } from "@/lib/lib";
 import { PrismaClient } from "@prisma/client"
 import { genSaltSync, hashSync } from "bcrypt-ts";
-import { sendVerificationEmail } from "../../auth/emailVerification";
+import { sendVerificationEmail } from "../email/action";
 
 const prisma = new PrismaClient()
+const key = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
 interface RegisterProps {
     email: string;
@@ -32,40 +33,33 @@ export async function checkExistingUser(values: RegisterProps) {
     return existingUser
 }
 
-export async function createUser(values: RegisterProps) {
+export async function encryptAccCreds(values: RegisterProps) {
     try {
-        const { firstname, middlename, lastname, email, password, role } = values
 
-        console.log(values)
         const salt = genSaltSync(10);
-        const hashedPassword = hashSync(password, salt);
+        const hashedPassword = hashSync(values.password, salt);
 
-        // Create user and select only necessary fields to return
-        const user = await prisma.user.create({
-            data: {
-                firstname,
-                middlename,
-                lastname,
-                email,
-                password: hashedPassword,
-                roleId: role,
-            }
-        })
-
-        const token = await encrypt({ email })
-        try {
-            await sendVerificationEmail({ email, token });
-            console.log('Verification email sent successfully');
-        } catch (emailError) {
-            console.error('Failed to send verification email:', emailError);
-            throw new Error('Failed to send verification email');
+        const newAccount = {
+            firstname: values.firstname,
+            middlename: values.middlename,
+            lastname: values.lastname,
+            email: values.email,
+            password: hashedPassword,
+            role: values.role,
         }
 
-        return token;
+        const token = await encrypt(newAccount)
+        await sendVerificationEmail(values.email, token)
+
+        return true
 
     } catch (error) {
-
+        console.error(error)
+        return false
     }
+
+
+
 }
 
 

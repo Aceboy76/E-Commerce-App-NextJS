@@ -1,5 +1,5 @@
 'use client'
-import { checkExistingUser, createUser, getRoles } from "@/app/api/account/register/action"
+import { checkExistingUser, encryptAccCreds, getRoles } from "@/app/api/account/register/action"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -13,11 +13,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { X } from "lucide-react"
+import { LoaderCircle, X } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import Message from "./messagePage"
 
 
 interface Role {
@@ -26,11 +27,10 @@ interface Role {
 }
 
 export default function Register() {
-
-
     const [isClient, setIsClient] = useState(false)
     const [roles, setRoles] = useState<Role[]>([])
-
+    const [isloading, setLoading] = useState(false)
+    const [isSubmitted, setSubmit] = useState(false)
 
     useEffect(() => {
         async function fetchData() {
@@ -49,7 +49,6 @@ export default function Register() {
         email: z.string().email({ message: "Please enter a valid email" }),
         password: z.string().min(6, ({ message: "Password must be 6 characters" })),
         confirmPassword: z.string().min(6, ({ message: "Password must be 6 characters" })),
-
     }).refine((data) => data.password == data.confirmPassword, {
         message: "Password don't match",
         path: ["confirmPassword"]
@@ -72,29 +71,37 @@ export default function Register() {
 
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        setLoading(true)
 
-        const existingUser = await checkExistingUser(values)
+        try {
+            const existingUser = await checkExistingUser(values)
 
-        if (existingUser) {
-            form.setError("email", {
-                message: "Email already exists",
-            });
-            return;
-        }
+            if (existingUser) {
+                form.setError("email", {
+                    message: "Email already exists",
+                });
+                setLoading(false)
+                return
+            }
 
-        const userCreated = await createUser(values)
+            const emailSent = await encryptAccCreds(values)
 
-        if (userCreated) {
-            form.reset()
-            alert("User was created successfully")
+            if (emailSent) {
+                form.reset()
+                setLoading(false)
+                setSubmit(true)
+            }
+        } catch (error) {
+            console.error(error)
         }
 
     }
 
     return (
         <>
-            {isClient && (
-                <div className="w-screen h-screen flex items-center justify-center bg-slate-200">
+            <div className="w-screen h-screen flex items-center justify-center bg-slate-200">
+
+                {isClient && !isSubmitted && (
 
                     <Card className="w-1/2" >
                         <Form {...form}>
@@ -149,7 +156,6 @@ export default function Register() {
                                                 </FormItem>
                                             )} />
 
-
                                         <FormField control={form.control} name="role"
                                             render={({ field }) => (
                                                 <FormItem>
@@ -167,7 +173,6 @@ export default function Register() {
 
                                                             </SelectContent>
                                                         </Select>
-
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -206,24 +211,34 @@ export default function Register() {
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
-                                            )} /></div>
+                                            )} />
+                                    </div>
                                 </CardContent>
                                 <CardFooter className="flex flex-row justify-between">
-                                    <Button variant={"link"} type="button">
-                                        <Link className="text-blue-500" href={"/login"}>Already have an account?</Link>
+                                    <Link href={"/login"}>
+                                        <Button className="text-blue-700" variant={"link"} type="button">
+                                            Already have an account?
+                                        </Button>
+                                    </Link>
+                                    <Button type="submit" variant={"default"} disabled={isloading}>
+                                        {isloading ? <LoaderCircle className="animate-spin" /> : "Submit"}
                                     </Button>
-                                    <Button type="submit" variant={"default"}>Submit</Button>
 
                                 </CardFooter>
                             </form>
                         </Form>
 
                     </Card>
-                </div>
-            )}
 
+                )}
+                {isSubmitted && (
+                    <Message
+                        Message="  An email is sent to your account."
 
+                    />
+                )}
 
+            </div>
         </>
     )
 }
