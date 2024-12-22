@@ -1,6 +1,7 @@
 'use client';
 
 import verifyEmail from "@/app/api/account/email/action";
+import Loading from "@/components/loading";
 import Message from "@/components/messagePage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "next/navigation";
@@ -30,12 +31,7 @@ function VerifyEmailContent() {
     return (
         <div className="w-screen h-screen flex justify-center items-center">
             {isLoading && (
-                <div className="flex flex-col justify-center items-center">
-                    <div className="space-y-2">
-                        <Skeleton className="h-6 w-[350px]" />
-                        <Skeleton className="h-6 w-[300px]" />
-                    </div>
-                </div>
+                <Loading />
             )}
             {verificationStatus === "User is created" && (
                 <Message
@@ -64,13 +60,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmail() {
     return (
-        <Suspense fallback={
-            <div className="flex flex-col justify-center items-center">
-                <div className="space-y-2">
-                    <Skeleton className="h-6 w-[350px]" />
-                    <Skeleton className="h-6 w-[300px]" />
-                </div>
-            </div>}>
+        <Suspense fallback={<Loading />}>
             <VerifyEmailContent />
         </Suspense>
     );
