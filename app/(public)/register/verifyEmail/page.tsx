@@ -17,14 +17,14 @@ function VerifyEmailContent() {
     useEffect(() => {
         async function emailVerified() {
             try {
-                setLoading(true);
                 const verificationStatus = await verifyEmail(tokenFromUrl);
                 setVerification(verificationStatus);
-                setLoading(false);
             } catch (error) {
                 console.error(error);
             }
+            setLoading(false);
         }
+        setLoading(true);
         emailVerified();
     }, [tokenFromUrl]);
 
