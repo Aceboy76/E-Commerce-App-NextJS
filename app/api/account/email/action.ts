@@ -1,11 +1,10 @@
 'use server'
 
 import nodemailer from 'nodemailer';
-import { PrismaClient } from '@prisma/client';
 import { decrypt, encrypt } from '@/lib/lib';
+import prisma from '@/prisma/db';
 
 
-const prisma = new PrismaClient();
 
 
 const smtpConfig = {
@@ -101,16 +100,12 @@ export default async function verifyEmail(tokenFromUrl: string) {
         const emailToken = await encrypt(decryptEmail)
         console.log(decryptedToken + "           " + emailToken)
 
-        const verifyTime = new Date().toISOString();
-
-
         const user = await prisma.user.create({
             data: {
                 firstname: decryptedToken.firstname,
                 middlename: decryptedToken.middlename,
                 lastname: decryptedToken.lastname,
                 email: decryptedToken.email,
-                emailVerified: verifyTime,
                 emailVerifyToken: emailToken,
                 password: decryptedToken.password,
                 roleId: decryptedToken.role,

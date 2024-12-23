@@ -35,7 +35,7 @@ model User {
   middlename       String?
   lastname         String
   email            String    @unique
-  emailVerified    DateTime?
+  emailVerified    DateTime? @default(now())
   emailVerifyToken String?   @db.VarChar(255)
   password         String
   role             Role      @relation(fields: [roleId], references: [id])

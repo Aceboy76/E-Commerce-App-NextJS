@@ -2,11 +2,10 @@
 
 import { encrypt } from "@/lib/lib";
 import { getSession } from "@/lib/session";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/prisma/db";
 import { compare } from "bcrypt-ts"; // Import bcrypt for password comparison
 import { cookies } from "next/headers";
 
-const prisma = new PrismaClient();      
 
 interface LoginProps {
     email: string;

@@ -25,7 +25,7 @@ CREATE TABLE `User` (
     `middlename` VARCHAR(191) NULL,
     `lastname` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
-    `emailVerified` DATETIME(3) NULL,
+    `emailVerified` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `emailVerifyToken` VARCHAR(255) NULL,
     `password` VARCHAR(191) NOT NULL,
     `updatedAt` DATETIME(3) NOT NULL,
