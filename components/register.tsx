@@ -13,12 +13,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { LoaderCircle, X } from "lucide-react"
+import { Eye, EyeClosed, LoaderCircle, X } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import Message from "./messagePage"
 
 
 interface Role {
@@ -30,7 +30,9 @@ export default function Register() {
     const [isClient, setIsClient] = useState(false)
     const [roles, setRoles] = useState<Role[]>([])
     const [isloading, setLoading] = useState(false)
-    const [isSubmitted, setSubmit] = useState(false)
+    const [showPass, setShowPass] = useState(false)
+    const router = useRouter();
+
 
     useEffect(() => {
         async function fetchData() {
@@ -40,6 +42,10 @@ export default function Register() {
         fetchData()
         setIsClient(true)
     }, [])
+
+    const toggleShowPass = () => {
+        setShowPass((showPass) => !(showPass))
+    }
 
     const formSchema = z.object({
         firstname: z.string().min(2).max(50),
@@ -89,7 +95,7 @@ export default function Register() {
             if (emailSent) {
                 form.reset()
                 setLoading(false)
-                setSubmit(true)
+                router.push('/register/emailSent');
             }
         } catch (error) {
             console.error(error)
@@ -101,7 +107,7 @@ export default function Register() {
         <>
             <div className="w-screen h-screen flex items-center justify-center bg-slate-200">
 
-                {isClient && !isSubmitted && (
+                {isClient && (
 
                     <Card className="w-1/2" >
                         <Form {...form}>
@@ -112,8 +118,8 @@ export default function Register() {
                                         <CardDescription>Create your credentials</CardDescription>
                                     </div>
 
-                                    <Link href={"/"}>
-                                        <Button type="button" variant={"ghost"}>
+                                    <Link href={isloading ? "" : "/"} >
+                                        <Button type="button" disabled={isloading} variant={"ghost"}>
                                             <X />
                                         </Button>
                                     </Link>
@@ -194,10 +200,23 @@ export default function Register() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Password</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Password" type="password"
-                                                            {...field} />
-                                                    </FormControl>
+                                                    <div className="relative">
+                                                        <FormControl>
+                                                            <Input placeholder="Password"
+                                                                type={showPass ? 'text' : 'password'}
+                                                                className="pr-14"
+                                                                {...field} />
+                                                        </FormControl>
+                                                        <Button
+                                                            type="button"
+                                                            onClick={toggleShowPass}
+                                                            variant={"ghost"}
+                                                            className="absolute top-1/2 right-2 transform -translate-y-1/2"
+                                                        >
+                                                            {showPass ? <EyeClosed /> : <Eye />}
+                                                        </Button>
+                                                    </div>
+
                                                     <FormMessage />
                                                 </FormItem>
                                             )} />
@@ -205,18 +224,33 @@ export default function Register() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Confirm Password</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Confirm Password" type="password"
-                                                            {...field} />
-                                                    </FormControl>
+                                                    <div className="relative">
+                                                        <FormControl>
+                                                            <Input placeholder="Confirm Password"
+                                                                type={showPass ? 'text' : 'password'}
+                                                                className="pr-14"
+                                                                {...field} />
+                                                        </FormControl>
+                                                        <Button
+                                                            type="button"
+                                                            onClick={toggleShowPass}
+                                                            variant={"ghost"}
+                                                            className="absolute top-1/2 right-2 transform -translate-y-1/2"
+                                                        >
+                                                            {showPass ? <EyeClosed /> : <Eye />}
+
+                                                        </Button>
+                                                    </div>
+
                                                     <FormMessage />
                                                 </FormItem>
                                             )} />
                                     </div>
                                 </CardContent>
                                 <CardFooter className="flex flex-row justify-between">
-                                    <Link href={"/login"}>
-                                        <Button className="text-blue-700" variant={"link"} type="button">
+                                    <Link href={isloading ? "" : "/login"}>
+                                        <Button className="text-blue-700" disabled={isloading} variant={"link"}
+                                            type="button">
                                             Already have an account?
                                         </Button>
                                     </Link>
@@ -231,12 +265,7 @@ export default function Register() {
                     </Card>
 
                 )}
-                {isSubmitted && (
-                    <Message
-                        Message="  An email is sent to your account."
 
-                    />
-                )}
 
             </div>
         </>

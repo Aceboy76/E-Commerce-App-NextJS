@@ -12,7 +12,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, X } from "lucide-react"
+import { Eye, EyeClosed, LoaderCircle, X } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -24,10 +24,16 @@ import { z } from "zod"
 export default function Login() {
 
     const [isClient, setIsClient] = useState(false)
+    const [showPass, setShowPass] = useState(false)
+    const [isloading, setLoading] = useState(false)
 
     useEffect(() => {
         setIsClient(true)
     }, [])
+
+    const toggleShowPass = () => {
+        setShowPass((showPass) => !(showPass))
+    }
 
     const formSchema = z.object({
         email: z.string().email({ message: "Please enter a valid email" }),
@@ -53,6 +59,7 @@ export default function Login() {
 
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        setLoading(true)
 
         try {
             const isUser = await loginUser(values);
@@ -62,6 +69,7 @@ export default function Login() {
             console.error(error)
         }
 
+        setLoading(false)
 
     }
 
@@ -79,8 +87,8 @@ export default function Login() {
                                         <CardDescription>Enter your credentials</CardDescription>
                                     </div>
 
-                                    <Link href={"/"}>
-                                        <Button type="button" variant={"ghost"}>
+                                    <Link href={isloading ? "" : "/"}>
+                                        <Button type="button" disabled={isloading} variant={"ghost"}>
                                             <X />
                                         </Button>
                                     </Link>
@@ -106,16 +114,17 @@ export default function Login() {
                                                 <div className="relative">
                                                     <FormControl>
                                                         <Input placeholder="Password"
-                                                            type="password"
+                                                            type={showPass ? 'text' : 'password'}
                                                             className="pr-14"
                                                             {...field} />
                                                     </FormControl>
                                                     <Button
                                                         type="button"
+                                                        onClick={toggleShowPass}
                                                         variant={"ghost"}
                                                         className="absolute top-1/2 right-2 transform -translate-y-1/2"
                                                     >
-                                                        <Eye />
+                                                        {showPass ? <EyeClosed /> : <Eye />}
                                                     </Button>
                                                 </div>
 
@@ -129,16 +138,17 @@ export default function Login() {
                                                 <div className="relative">
                                                     <FormControl>
                                                         <Input placeholder="Confirm Password"
-                                                            type="password"
+                                                            type={showPass ? 'text' : 'password'}
                                                             className="pr-14"
                                                             {...field} />
                                                     </FormControl>
                                                     <Button
                                                         type="button"
+                                                        onClick={toggleShowPass}
                                                         variant={"ghost"}
                                                         className="absolute top-1/2 right-2 transform -translate-y-1/2"
                                                     >
-                                                        <Eye />
+                                                        {showPass ? <EyeClosed /> : <Eye />}
                                                     </Button>
                                                 </div>
 
@@ -147,12 +157,15 @@ export default function Login() {
                                         )} />
                                 </CardContent>
                                 <CardFooter className="flex flex-row justify-between">
-                                    <Link href={"/register"}>
-                                        <Button className="text-blue-700" variant={"link"} type="button">
+                                    <Link href={isloading ? "" : "/register"}>
+                                        <Button className="text-blue-700" disabled={isloading} variant={"link"}
+                                            type="button">
                                             Create an account?
                                         </Button>
                                     </Link>
-                                    <Button type="submit" variant={"default"}>Submit</Button>
+                                    <Button type="submit" variant={"default"} disabled={isloading}>
+                                        {isloading ? <LoaderCircle className="animate-spin" /> : "Submit"}
+                                    </Button>
                                 </CardFooter>
                             </form>
                         </Form>
