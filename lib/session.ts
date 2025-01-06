@@ -16,13 +16,20 @@ export async function updateSession(request: NextRequest) {
     if (!session) return;
 
     const parsed = await decrypt(session);
-    parsed.expires = new Date(Date.now() + 100 * 1000);
+    if (!parsed) return;
+
+    parsed.expires = new Date(Date.now() + 1 * 60 * 60 * 1000);
+
     const res = NextResponse.next();
     res.cookies.set({
         name: "session",
         value: await encrypt(parsed),
         httpOnly: true,
-        expires: parsed.expires,
+        expires: new Date(parsed.expires),
     });
     return res;
+}
+
+export async function deleteSession() {
+    (await cookies()).set("session", "", { expires: new Date(0) });
 }

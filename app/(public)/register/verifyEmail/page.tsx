@@ -1,8 +1,7 @@
-'use client';
-
+'use client'
 import verifyEmail from "@/app/api/account/email/action";
-import Loading from "@/components/loading";
-import Message from "@/components/messagePage";
+import { Loading } from "@/components/loading";
+import { Message } from "@/components/messagePage";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 
@@ -15,12 +14,8 @@ function VerifyEmailContent() {
 
     useEffect(() => {
         async function emailVerified() {
-            try {
-                const verificationStatus = await verifyEmail(tokenFromUrl);
-                setVerification(verificationStatus);
-            } catch (error) {
-                console.error(error);
-            }
+            const verificationStatus = await verifyEmail(tokenFromUrl);
+            setVerification(verificationStatus);
             setLoading(false);
         }
         setLoading(true);

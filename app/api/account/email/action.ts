@@ -79,9 +79,9 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 export default async function verifyEmail(tokenFromUrl: string) {
 
   try {
-    const decryptedToken = await decrypt(tokenFromUrl)
+    const decryptedToken  = await decrypt(tokenFromUrl)
 
-    const isEmailExist = await prisma.user.findUnique({
+    const isEmailExist: object | null = await prisma.user.findUnique({
       where: {
         email: decryptedToken.email,
       },

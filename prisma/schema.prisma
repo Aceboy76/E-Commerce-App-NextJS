@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,14 +21,6 @@ model Role {
   User      User[]
 }
 
-model Session {
-  id        String   @id @default(cuid())
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
-  userId    String
-  User      User     @relation(fields: [userId], references: [id])
-}
-
 model User {
   id               String    @id @default(cuid())
   firstname        String
@@ -38,9 +30,22 @@ model User {
   emailVerified    DateTime? @default(now())
   emailVerifyToken String?   @db.VarChar(255)
   password         String
-  role             Role      @relation(fields: [roleId], references: [id])
+  role             Role      @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   updatedAt        DateTime  @updatedAt
   createdAt        DateTime  @default(now())
   roleId           String
-  Session          Session[]
+  Product          Product[]
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  product_Name     String
+  product_category String
+  SKU              String
+  price            Decimal
+  stock            Int
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
 }

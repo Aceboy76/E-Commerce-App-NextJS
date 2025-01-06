@@ -14,7 +14,8 @@ import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeClosed, LoaderCircle, X } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -23,17 +24,15 @@ import { z } from "zod"
 
 export default function Login() {
 
-    const [isClient, setIsClient] = useState(false)
+    const router = useRouter()
+
     const [showPass, setShowPass] = useState(false)
     const [isloading, setLoading] = useState(false)
 
-    useEffect(() => {
-        setIsClient(true)
-    }, [])
 
-    const toggleShowPass = () => {
+    const toggleShowPass = useCallback(() => {
         setShowPass((showPass) => !(showPass))
-    }
+    }, [])
 
     const formSchema = z.object({
         email: z.string().email({ message: "Please enter a valid email" }),
@@ -58,121 +57,125 @@ export default function Login() {
     })
 
 
-    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    const handleSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
         setLoading(true)
 
         try {
-            const isUser = await loginUser(values);
+            const loginStatus = await loginUser(values);
 
-            alert(isUser)
+            if (loginStatus == 'seller') {
+                router.push('/sellerHomePage')
+            } else if (loginStatus == 'customer') {
+                router.push('/')
+
+            }
+            // alert(loginStatus)
         } catch (error) {
             console.error(error)
         }
 
         setLoading(false)
 
-    }
+    }, [form])
 
     return (
         <>
-            {isClient && (
-                <div className="w-screen h-screen flex items-center justify-center bg-slate-200">
+            <div className="w-screen h-screen flex items-center justify-center bg-slate-200">
 
-                    <Card className="w-1/4" >
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(handleSubmit)}>
-                                <CardHeader className="flex flex-row justify-between">
-                                    <div>
-                                        <CardTitle>LOGIN</CardTitle>
-                                        <CardDescription>Enter your credentials</CardDescription>
-                                    </div>
+                <Card className="w-1/4" >
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleSubmit)}>
+                            <CardHeader className="flex flex-row justify-between">
+                                <div>
+                                    <CardTitle>LOGIN</CardTitle>
+                                    <CardDescription>Enter your credentials</CardDescription>
+                                </div>
 
-                                    <Link href={isloading ? "" : "/"}>
-                                        <Button type="button" disabled={isloading} variant={"ghost"}>
-                                            <X />
-                                        </Button>
-                                    </Link>
+                                <Link href={isloading ? "" : "/"}>
+                                    <Button type="button" disabled={isloading} variant={"ghost"}>
+                                        <X />
+                                    </Button>
+                                </Link>
 
-                                </CardHeader>
-                                <CardContent className=" space-y-4">
-                                    <FormField control={form.control} name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
+                            </CardHeader>
+                            <CardContent className=" space-y-4">
+                                <FormField control={form.control} name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Email</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Email" type="text"
+                                                    {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                <FormField control={form.control} name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Password</FormLabel>
+                                            <div className="relative">
                                                 <FormControl>
-                                                    <Input
-                                                        placeholder="Email" type="text"
+                                                    <Input placeholder="Password"
+                                                        type={showPass ? 'text' : 'password'}
+                                                        className="pr-14"
                                                         {...field} />
                                                 </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-                                    <FormField control={form.control} name="password"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Password</FormLabel>
-                                                <div className="relative">
-                                                    <FormControl>
-                                                        <Input placeholder="Password"
-                                                            type={showPass ? 'text' : 'password'}
-                                                            className="pr-14"
-                                                            {...field} />
-                                                    </FormControl>
-                                                    <Button
-                                                        type="button"
-                                                        onClick={toggleShowPass}
-                                                        variant={"ghost"}
-                                                        className="absolute top-1/2 right-2 transform -translate-y-1/2"
-                                                    >
-                                                        {showPass ? <EyeClosed /> : <Eye />}
-                                                    </Button>
-                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    onClick={toggleShowPass}
+                                                    variant={"ghost"}
+                                                    className="absolute top-1/2 right-2 transform -translate-y-1/2"
+                                                >
+                                                    {showPass ? <EyeClosed /> : <Eye />}
+                                                </Button>
+                                            </div>
 
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-                                    <FormField control={form.control} name="confirmPassword"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Confirm Password</FormLabel>
-                                                <div className="relative">
-                                                    <FormControl>
-                                                        <Input placeholder="Confirm Password"
-                                                            type={showPass ? 'text' : 'password'}
-                                                            className="pr-14"
-                                                            {...field} />
-                                                    </FormControl>
-                                                    <Button
-                                                        type="button"
-                                                        onClick={toggleShowPass}
-                                                        variant={"ghost"}
-                                                        className="absolute top-1/2 right-2 transform -translate-y-1/2"
-                                                    >
-                                                        {showPass ? <EyeClosed /> : <Eye />}
-                                                    </Button>
-                                                </div>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                <FormField control={form.control} name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Confirm Password</FormLabel>
+                                            <div className="relative">
+                                                <FormControl>
+                                                    <Input placeholder="Confirm Password"
+                                                        type={showPass ? 'text' : 'password'}
+                                                        className="pr-14"
+                                                        {...field} />
+                                                </FormControl>
+                                                <Button
+                                                    type="button"
+                                                    onClick={toggleShowPass}
+                                                    variant={"ghost"}
+                                                    className="absolute top-1/2 right-2 transform -translate-y-1/2"
+                                                >
+                                                    {showPass ? <EyeClosed /> : <Eye />}
+                                                </Button>
+                                            </div>
 
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-                                </CardContent>
-                                <CardFooter className="flex flex-row justify-between">
-                                    <Link href={isloading ? "" : "/register"}>
-                                        <Button className="text-blue-700" disabled={isloading} variant={"link"}
-                                            type="button">
-                                            Create an account?
-                                        </Button>
-                                    </Link>
-                                    <Button type="submit" variant={"default"} disabled={isloading}>
-                                        {isloading ? <LoaderCircle className="animate-spin" /> : "Submit"}
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                            </CardContent>
+                            <CardFooter className="flex flex-row justify-between">
+                                <Link href={isloading ? "" : "/register"}>
+                                    <Button className="text-blue-700" disabled={isloading} variant={"link"}
+                                        type="button">
+                                        Create an account?
                                     </Button>
-                                </CardFooter>
-                            </form>
-                        </Form>
+                                </Link>
+                                <Button type="submit" variant={"default"} disabled={isloading}>
+                                    {isloading ? <LoaderCircle className="animate-spin" /> : "Submit"}
+                                </Button>
+                            </CardFooter>
+                        </form>
+                    </Form>
 
-                    </Card>
-                </div>
-            )}
+                </Card>
+            </div>
 
 
 

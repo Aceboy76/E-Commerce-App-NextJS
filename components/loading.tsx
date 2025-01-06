@@ -1,6 +1,7 @@
+
 import { Skeleton } from "./ui/skeleton";
 
-export default function Loading() {
+export async function Loading() {
     return (
         <>
             <div className="flex flex-col justify-center items-center">

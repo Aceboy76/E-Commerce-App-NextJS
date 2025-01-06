@@ -7,7 +7,7 @@ interface MessageProps {
     link?: string;
 }
 
-export default function Message({ Message, buttonTitle, link }: MessageProps) {
+export function Message({ Message, buttonTitle, link }: MessageProps) {
     return (
         <div className="flex flex-col justify-center items-center text-center">
             <p className="text-lg mb-4">

@@ -1,3 +1,4 @@
+import { promises } from "dns";
 import { SignJWT, jwtVerify } from "jose";
 
 const secretKey = process.env.JWT_SECRET_KEY;
@@ -12,10 +13,13 @@ export async function encrypt(payload: any) {
     .sign(key);
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function decrypt(input: string): Promise<any> {
-  
-  const { payload } = await jwtVerify(input, key, {
-    algorithms: ["HS256"],
-  });
-  return payload;
+export async function decrypt(session: string): Promise<any> {
+  try {
+    const { payload } = await jwtVerify(session, key, {
+      algorithms: ['HS256'],
+    })
+    return payload
+  } catch (error) {
+    console.log('Failed to verify session')
+  }
 }
