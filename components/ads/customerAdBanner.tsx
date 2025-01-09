@@ -1,6 +1,9 @@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Suspense } from "react";
+import { Loading } from "../loading";
 
-export default function CustomerAdBanner() {
+
+ function CustomerAdContent() {
     return (<>
         <div>
             <Carousel>
@@ -22,3 +25,11 @@ export default function CustomerAdBanner() {
 
     </>)
 }
+
+export default function CustomerAdBanner() {
+     return (
+            <Suspense fallback={<Loading />}>
+                <CustomerAdContent />
+            </Suspense>
+        );
+ }

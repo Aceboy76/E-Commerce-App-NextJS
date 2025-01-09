@@ -50,8 +50,9 @@ export async function encryptAccCreds(values: RegisterProps) {
         const token = await encrypt(newAccount)
         await sendVerificationEmail(values.email, token)
 
-        return true
-
+        return {
+            success: true,      
+        };
     } catch (error) {
         console.error(error)
         return false

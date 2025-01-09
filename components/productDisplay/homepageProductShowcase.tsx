@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Loading } from "../loading";
 
-export default function HomepageProductShowcase() {
+ function HomepageProductContent() {
     const cardnum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
     return (
@@ -18,5 +20,13 @@ export default function HomepageProductShowcase() {
                 ))}
             </div>
         </>
+    );
+}
+
+export default function HomepageProductShowcase() {
+ return (
+        <Suspense fallback={<Loading />}>
+            <HomepageProductContent />
+        </Suspense>
     );
 }

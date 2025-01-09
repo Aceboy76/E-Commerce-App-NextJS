@@ -1,4 +1,4 @@
-import GuestLayout from "./(public)/customerHomePage/layout";
+import GuestLayout from "./(public)/customerPage/layout";
 
 export default function Home() {
   return (

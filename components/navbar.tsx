@@ -6,7 +6,6 @@ import { SearchIcon } from "lucide-react";
 import Link from "next/link";
 
 
-
 export default async function Navbar() {
     const hasSession = await getSession()
     const email = hasSession ? hasSession.email : null

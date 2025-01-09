@@ -93,7 +93,7 @@ export default function Register() {
 
             const emailSent = await encryptAccCreds(values)
 
-            if (emailSent) {
+            if (emailSent && emailSent.success) {
                 form.reset()
                 setLoading(false)
                 sentEmail(true)

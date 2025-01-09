@@ -12,12 +12,13 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, EyeClosed, LoaderCircle, X } from "lucide-react"
+import { Eye, EyeClosed, LoaderCircle, Terminal, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 
 
 
@@ -28,6 +29,8 @@ export default function Login() {
 
     const [showPass, setShowPass] = useState(false)
     const [isloading, setLoading] = useState(false)
+    const [showAlert, setAlert] = useState(false)
+    const [alertMsg, setAlertMsg] = useState<string>('')
 
 
     const toggleShowPass = useCallback(() => {
@@ -56,30 +59,60 @@ export default function Login() {
 
     })
 
+    function alertDef(message: string, url: string) {
+        setAlert(true);
+        setAlertMsg(message);
+
+        setTimeout(() => {
+            router.push(url);
+            setAlert(false);
+        }, 3000);
+
+    }
+
 
     const handleSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
-        setLoading(true)
+        setLoading(true);
 
         try {
             const loginStatus = await loginUser(values);
+            console.log("Login status:", loginStatus);
 
-            if (loginStatus == 'seller') {
-                router.push('/sellerHomePage')
-            } else if (loginStatus == 'customer') {
-                router.push('/')
-
+            if (loginStatus && loginStatus.success) {
+                if (loginStatus.role === 'seller') {
+                } else if (loginStatus.role === 'customer') {
+                    alertDef('You are now logged in', '/customerPage');
+                }
             }
-            // alert(loginStatus)
+            if (loginStatus && !loginStatus.success && loginStatus.field === 'email') {
+                form.setError("email", {
+                    message: "Email not found",
+                });
+            }
+            if (loginStatus && !loginStatus.success && loginStatus.field === 'password') {
+                form.setError("password", {
+                    message: "Password is incorrect",
+                });
+                form.setError("confirmPassword", {
+                    message: "Password is incorrect",
+                });
+            }
+
+
+
         } catch (error) {
-            console.error(error)
+            console.error(error);
         }
+        setLoading(false);
+    }, [form]);
 
-        setLoading(false)
 
-    }, [form])
 
     return (
         <>
+
+
+
             <div className="w-screen h-screen flex items-center justify-center bg-slate-200">
 
                 <Card className="w-1/4" >
@@ -175,10 +208,23 @@ export default function Login() {
                     </Form>
 
                 </Card>
+
+
+                {showAlert && (
+                    <div className="absolute z-50 top-10 w-2/6 ">
+                        <Alert className=" bg-black text-white">
+                            <Terminal className="h-4 w-4 stroke-white" />
+                            <AlertTitle>Heads up!</AlertTitle>
+                            <AlertDescription>
+                                {alertMsg}
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+                )}
             </div>
 
-
-
         </>
+
     )
+
 }
